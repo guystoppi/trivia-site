@@ -1,0 +1,37 @@
+--- a/index.html
++++ b/index.html
+@@ -522,7 +522,7 @@
+       renderQuestionList();
+ 
+       const modeLabels = {
+-        standard: { label: "⏰ Timed", cls: "tag-standard" },
++        standard: { label: "📄 Standard", cls: "tag-standard" },
+         mute: { label: "🤫 Mute Round", cls: "tag-mute" },
+         majority: { label: "🐑 Majority", cls: "tag-majority" },
+         closest: { label: "🎯 Closest W/O Over", cls: "tag-closest" },
+@@ -533,12 +533,13 @@
+         const m = modeLabels[q.mode] || modeLabels.standard;
+         const hasAudio = Boolean(extractYouTubeID(q.youtube));
+         const isUnlimited = q.duration === 0;
++        const displayLabel = (q.mode === "standard" && isUnlimited) ? { label: "📄 Standard", cls: "tag-standard" } : m;
+         const item = document.createElement("div");
+         item.className = "q-item";
+         item.innerHTML = `
+           <div class="q-item-info">
+             <div class="q-item-meta">
+               <strong style="color: var(--text-muted);">#${idx + 1}</strong>
+-              <span class="tag ${m.cls}">${m.label}</span>
++              <span class="tag ${displayLabel.cls}">${displayLabel.label}</span>
+               ${isUnlimited ? '<span class="tag tag-unlimited">∞ Unlimited</span>' : `<span class="tag tag-time">⏱ ${q.duration}s</span>`}
+               ${hasAudio ? `<span class="tag tag-audio">🎵 Audio (${q.start}s)</span>` : ""}
+             </div>
+@@ -733,7 +734,7 @@
+           banner.classList.add("huge-banner-exact");
+           icon.textContent = "🎯";
+           title.textContent = "Closest to Right Answer Wins";
+           sub.textContent = "Absolute closest guess to the real number wins the points!";
+-        } else {
++        } else if (!isUnlimited) {
+           banner.classList.add("huge-banner-standard");
+           icon.textContent = "⏰";
+           title.textContent = "Timed Question";

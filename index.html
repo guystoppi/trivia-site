@@ -846,7 +846,7 @@
         }
       } catch (e) {}
 
-      const saved = localStorage.getItem("canopy_trivia_questions_v4");
+      const saved = localStorage.getItem("canopy_trivia_questions_v5");
       if (saved) {
         try {
           questions = normalizeQuestions(JSON.parse(saved));
@@ -871,7 +871,7 @@
     }
 
     function persistQuestions() {
-      localStorage.setItem("canopy_trivia_questions_v4", JSON.stringify(questions));
+      localStorage.setItem("canopy_trivia_questions_v5", JSON.stringify(questions));
     }
 
     function toggleUnlimitedDuration() {
@@ -1001,8 +1001,8 @@
         return;
       }
 
-const modeLabels = {
-        standard: { label: "📄 Standard", cls: "tag-standard" },
+      const modeLabels = {
+        standard: { label: "⏰ Timed", cls: "tag-standard" },
         mute: { label: "🤫 Mute Round", cls: "tag-mute" },
         majority: { label: "🐑 Majority", cls: "tag-majority" },
         closest: { label: "🎯 Closest W/O Over", cls: "tag-closest" },
@@ -1013,7 +1013,10 @@ const modeLabels = {
         const m = modeLabels[q.mode] || modeLabels.standard;
         const hasAudio = Boolean(extractYouTubeID(q.youtube));
         const isUnlimited = q.duration === 0;
-        const displayLabel = (q.mode === "standard" && isUnlimited) ? { label: "📄 Standard", cls: "tag-standard" } : m;
+        const displayLabel = (q.mode === "standard" && isUnlimited)
+          ? { label: "📄 Standard", cls: "tag-standard" }
+          : m;
+
         const item = document.createElement("div");
         item.className = "q-item";
         item.innerHTML = `
@@ -1190,39 +1193,42 @@ const modeLabels = {
 
       const isUnlimited = q.duration === 0;
 
-      // Show banner and timer
-      banner.classList.remove("hidden");
-      timerContainer.classList.remove("hidden");
-      banner.className = "huge-mode-banner";
+      // Timer container visibility
+      timerContainer.classList.toggle("hidden", isUnlimited);
 
-      if (q.mode === "mute") {
-        banner.classList.add("huge-banner-mute");
-        icon.textContent = "🤫";
-        title.textContent = "Mute Round — Silence in the Room!";
-        sub.textContent = "No talking, whispering, or showing phones. Gestures only!";
-      } else if (q.mode === "majority") {
-        banner.classList.add("huge-banner-majority");
-        icon.textContent = "🐑";
-        title.textContent = "Majority Rules Round";
-        sub.textContent = "No right answer—score points by matching the room's most popular answer.";
-      } else if (q.mode === "closest") {
-        banner.classList.add("huge-banner-closest");
-        icon.textContent = "🎯";
-        title.textContent = "Closest Without Going Over";
-        sub.textContent = "Guess as close as possible—going over by even 1 gets zero points!";
-      } else if (q.mode === "exact") {
-        banner.classList.add("huge-banner-exact");
-        icon.textContent = "🎯";
-        title.textContent = "Closest to Right Answer Wins";
-        sub.textContent = "Absolute closest guess to the real number wins the points!";
-      } else if (!isUnlimited) {
-        banner.classList.add("huge-banner-standard");
-        icon.textContent = "⏰";
-        title.textContent = "Timed Question";
-        sub.textContent = "Write down your answers before time runs out!";
-      } else {
+      // Banner visibility: hide ONLY if it's standard mode AND unlimited time
+      if (q.mode === "standard" && isUnlimited) {
         banner.classList.add("hidden");
-        timerContainer.classList.add("hidden");
+      } else {
+        banner.classList.remove("hidden");
+        banner.className = "huge-mode-banner";
+
+        if (q.mode === "mute") {
+          banner.classList.add("huge-banner-mute");
+          icon.textContent = "🤫";
+          title.textContent = "Mute Round — Silence in the Room!";
+          sub.textContent = "No talking, whispering, or showing phones. Gestures only!";
+        } else if (q.mode === "majority") {
+          banner.classList.add("huge-banner-majority");
+          icon.textContent = "🐑";
+          title.textContent = "Majority Rules Round";
+          sub.textContent = "No right answer—score points by matching the room's most popular answer.";
+        } else if (q.mode === "closest") {
+          banner.classList.add("huge-banner-closest");
+          icon.textContent = "🎯";
+          title.textContent = "Closest Without Going Over";
+          sub.textContent = "Guess as close as possible—going over by even 1 gets zero points!";
+        } else if (q.mode === "exact") {
+          banner.classList.add("huge-banner-exact");
+          icon.textContent = "🎯";
+          title.textContent = "Closest to Right Answer Wins";
+          sub.textContent = "Absolute closest guess to the real number wins the points!";
+        } else {
+          banner.classList.add("huge-banner-standard");
+          icon.textContent = "⏰";
+          title.textContent = "Timed Question";
+          sub.textContent = "Write down your answers before time runs out!";
+        }
       }
 
       // YouTube Audio setup & smart sync
