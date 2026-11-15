@@ -308,6 +308,7 @@
     .tag-mute { background: #fee2e2; color: #991b1b; }
     .tag-majority { background: #e0e7ff; color: #3730a3; }
     .tag-closest { background: #d1fae5; color: #065f46; }
+    .tag-exact { background: #fae8ff; color: #86198f; }
     .tag-audio { background: #fce7f3; color: #9d174d; }
 
     .q-item-text {
@@ -347,55 +348,68 @@
       color: var(--text-dark);
       width: 100%;
       border-radius: 28px;
-      padding: 44px 52px;
+      padding: 40px 48px;
       box-shadow: var(--shadow-lg);
       position: relative;
       overflow: hidden;
-      min-height: 430px;
+      min-height: 440px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       transition: transform 0.25s ease;
     }
 
-    /* Mode Banner at top of card */
-    .mode-banner {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 20px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 1rem;
-      letter-spacing: 0.05em;
+    /* Massive Mode Banner at Top of Card */
+    .huge-mode-banner {
+      width: 100%;
+      padding: 22px 28px;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: clamp(1.3rem, 2.4vw, 1.8rem);
+      letter-spacing: 0.03em;
       text-transform: uppercase;
-      align-self: flex-start;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      border: 3px solid rgba(0, 0, 0, 0.06);
     }
 
-    .mode-standard { background: #d1fae5; color: #065f46; }
-    .mode-rapid { background: #fef3c7; color: #b45309; }
-    .mode-mute { background: #fee2e2; color: #b91c1c; animation: pulseBorder 2s infinite; }
-    .mode-majority { background: #e0e7ff; color: #3730a3; }
-    .mode-closest { background: #ccfbf1; color: #0f766e; }
+    .huge-banner-standard { background: #e6f4ea; color: #137333; border-color: #ceead6; }
+    .huge-banner-rapid { background: #fef7e0; color: #b06000; border-color: #fce8b2; }
+    .huge-banner-mute { background: #fce8e6; color: #c5221f; border-color: #fadcbc; animation: pulseBanner 2s infinite; }
+    .huge-banner-majority { background: #e8eaed; color: #202124; border-color: #dadce0; }
+    .huge-banner-closest { background: #e4f7f0; color: #0d652d; border-color: #cef1e3; }
+    .huge-banner-exact { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
 
-    @keyframes pulseBorder {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35); }
-      50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+    @keyframes pulseBanner {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197, 34, 31, 0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(197, 34, 31, 0); }
     }
 
-    .mode-instruction {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-top: -14px;
-      margin-bottom: 24px;
+    .banner-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+
+    .banner-text-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .banner-sub {
+      font-size: 0.9rem;
+      font-weight: 700;
+      opacity: 0.85;
+      margin-top: 2px;
+      letter-spacing: 0.02em;
     }
 
     .question-text {
-      font-size: clamp(1.8rem, 3.6vw, 2.85rem);
+      font-size: clamp(1.8rem, 3.4vw, 2.7rem);
       font-weight: 800;
-      line-height: 1.22;
+      line-height: 1.25;
       color: var(--bg-deep);
       margin-bottom: 28px;
     }
@@ -591,7 +605,7 @@
 
         <div class="form-group">
           <label for="q-text">Question Prompt</label>
-          <textarea id="q-text" placeholder="e.g., Name the song and artist playing right now!"></textarea>
+          <textarea id="q-text" placeholder="e.g., What year was the Eiffel Tower completed?"></textarea>
         </div>
 
         <div class="row-2">
@@ -602,6 +616,7 @@
               <option value="mute">🤫 Mute Round (No Talking)</option>
               <option value="majority">🐑 Majority Rules</option>
               <option value="closest">🎯 Closest Without Going Over</option>
+              <option value="exact">🎯 Closest to Right Answer Wins</option>
             </select>
           </div>
 
@@ -668,8 +683,15 @@
 
       <div class="question-card" id="question-card">
         <div>
-          <div id="stage-badge" class="mode-banner mode-standard">⚡ Rapid Fire</div>
-          <div id="stage-instruction" class="mode-instruction">Write down your answer before the clock hits zero!</div>
+          <!-- MASSIVE GAME MODE BANNER AT THE TOP -->
+          <div id="huge-banner" class="huge-mode-banner huge-banner-standard">
+            <div id="banner-icon" class="banner-icon">⚡</div>
+            <div class="banner-text-wrap">
+              <span id="banner-title">Rapid Fire Round</span>
+              <span id="banner-sub" class="banner-sub">Write down your answers before time runs out!</span>
+            </div>
+          </div>
+
           <div id="stage-question" class="question-text">Loading question...</div>
         </div>
 
@@ -749,7 +771,7 @@
     // ================= STATE & SAMPLE DATA =================
     const SAMPLE_QUESTIONS = [
       {
-        text: "Rapid Fire: What is the only mammal capable of true sustained flight?",
+        text: "What is the only mammal capable of true sustained flight?",
         mode: "standard",
         duration: 12,
         youtube: "",
@@ -765,17 +787,25 @@
         autoplay: true
       },
       {
-        text: "Discussion Question: What team has the most creative strategy?",
-        mode: "standard",
-        duration: 0,
+        text: "Write down the 7 colors of the rainbow in order.",
+        mode: "mute",
+        duration: 25,
         youtube: "",
         start: 0,
         autoplay: false
       },
       {
-        text: "MUTE ROUND: Without making a sound or showing your phone, write down the 7 colors of the rainbow in order.",
-        mode: "mute",
-        duration: 25,
+        text: "What is the single best pizza topping?",
+        mode: "majority",
+        duration: 20,
+        youtube: "",
+        start: 0,
+        autoplay: false
+      },
+      {
+        text: "How many dimples are on a regulation golf ball?",
+        mode: "closest",
+        duration: 20,
         youtube: "",
         start: 0,
         autoplay: false
@@ -809,7 +839,7 @@
         }
       } catch (e) {}
 
-      const saved = localStorage.getItem("canopy_trivia_questions_v2");
+      const saved = localStorage.getItem("canopy_trivia_questions_v3");
       if (saved) {
         try {
           questions = normalizeQuestions(JSON.parse(saved));
@@ -825,7 +855,7 @@
     function normalizeQuestions(rawList) {
       return rawList.map(q => ({
         text: q.text || q.question || "Untitled Question",
-        mode: ["standard", "mute", "majority", "closest"].includes(q.mode) ? q.mode : "standard",
+        mode: ["standard", "mute", "majority", "closest", "exact"].includes(q.mode) ? q.mode : "standard",
         duration: q.duration !== undefined ? Number(q.duration) : 20,
         youtube: q.youtube || q.audio || "",
         start: Number(q.start) || 0,
@@ -834,7 +864,7 @@
     }
 
     function persistQuestions() {
-      localStorage.setItem("canopy_trivia_questions_v2", JSON.stringify(questions));
+      localStorage.setItem("canopy_trivia_questions_v3", JSON.stringify(questions));
     }
 
     function toggleUnlimitedDuration() {
@@ -873,7 +903,6 @@
               status.textContent = "Playing audio...";
               btn.textContent = "⏸ Pause Audio";
 
-              // If timer was waiting for audio buffering to complete, start countdown now!
               if (timerWaitingForAudio) {
                 timerWaitingForAudio = false;
                 startCountdown();
@@ -969,7 +998,8 @@
         standard: { label: "⚡ Standard", cls: "tag-rapid" },
         mute: { label: "🤫 Mute Round", cls: "tag-mute" },
         majority: { label: "🐑 Majority", cls: "tag-majority" },
-        closest: { label: "🎯 Closest W/O", cls: "tag-closest" }
+        closest: { label: "🎯 Closest W/O Over", cls: "tag-closest" },
+        exact: { label: "🎯 Closest to Right", cls: "tag-exact" }
       };
 
       questions.forEach((q, idx) => {
@@ -1143,27 +1173,39 @@
       document.getElementById("stage-progress").textContent = `Question ${idx + 1} of ${questions.length}`;
       document.getElementById("stage-question").textContent = q.text;
 
-      // Mode styling & instructions
-      const badge = document.getElementById("stage-badge");
-      const inst = document.getElementById("stage-instruction");
-      badge.className = "mode-banner";
+      // Massive Banner Styling & Subtitles
+      const banner = document.getElementById("huge-banner");
+      const icon = document.getElementById("banner-icon");
+      const title = document.getElementById("banner-title");
+      const sub = document.getElementById("banner-sub");
+
+      banner.className = "huge-mode-banner";
 
       if (q.mode === "mute") {
-        badge.classList.add("mode-mute");
-        badge.textContent = "🤫 MUTE ROUND";
-        inst.textContent = "NO talking, whispering, or showing phones! Gestures only.";
+        banner.classList.add("huge-banner-mute");
+        icon.textContent = "🤫";
+        title.textContent = "Mute Round — Silence in the Room!";
+        sub.textContent = "No talking, whispering, or showing phones. Gestures only!";
       } else if (q.mode === "majority") {
-        badge.classList.add("mode-majority");
-        badge.textContent = "🐑 MAJORITY RULES";
-        inst.textContent = "No right answer—score points by matching the most popular answer in the room!";
+        banner.classList.add("huge-banner-majority");
+        icon.textContent = "🐑";
+        title.textContent = "Majority Rules Round";
+        sub.textContent = "No right answer—score points by matching the room's most popular answer.";
       } else if (q.mode === "closest") {
-        badge.classList.add("mode-closest");
-        badge.textContent = "🎯 CLOSEST WITHOUT GOING OVER";
-        inst.textContent = "Guess as close as possible without going over—going over by even 1 gets zero!";
+        banner.classList.add("huge-banner-closest");
+        icon.textContent = "🎯";
+        title.textContent = "Closest Without Going Over";
+        sub.textContent = "Guess as close as possible—going over by even 1 gets zero points!";
+      } else if (q.mode === "exact") {
+        banner.classList.add("huge-banner-exact");
+        icon.textContent = "🎯";
+        title.textContent = "Closest to Right Answer Wins";
+        sub.textContent = "Absolute closest guess to the real number wins the points!";
       } else {
-        badge.classList.add("mode-rapid");
-        badge.textContent = "⚡ RAPID FIRE";
-        inst.textContent = "Answer fast! The screen locks automatically when time runs out.";
+        banner.classList.add("huge-banner-rapid");
+        icon.textContent = "⚡";
+        title.textContent = "Rapid Fire Round";
+        sub.textContent = "Write down your answers before the clock runs out!";
       }
 
       // YouTube Audio setup & smart sync
@@ -1190,7 +1232,6 @@
       timeLeft = q.duration;
 
       if (q.duration === 0) {
-        // Unlimited duration
         document.getElementById("timer-title-label").textContent = "Timer Mode";
         document.getElementById("timer-digits").textContent = "∞ Unlimited";
         document.getElementById("progress-fill").style.width = "100%";
