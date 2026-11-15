@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canopy Trivia — Eco Edition</title>
+  <style>
+    :root {
+      --bg-deep: #0f241d;
+      --bg-forest: #17352b;
+      --surface-card: #f6f8f5;
+      --surface-muted: #e6ede8;
+      --accent-leaf: #2e8b57;
+      --accent-bright: #48bb78;
+      --accent-gold: #d99b26;
+      --accent-coral: #d9534f;
+      --accent-teal: #2b7a78;
+      --accent-purple: #6b46c1;
+      --text-dark: #132a22;
+      --text-muted: #4a6359;
+      --text-light: #f2f7f4;
+      --border-soft: #cddbd2;
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.35);
+      --radius-lg: 20px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at top right, #1e4638 0%, var(--bg-deep) 65%);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Subtle botanical background pattern */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(72, 187, 120, 0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header / Nav */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px;
+      background: rgba(15, 36, 29, 0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-bright), var(--accent-leaf));
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    button {
+      font-family: inherit;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--accent-bright);
+      color: #0b2218;
+      box-shadow: 0 4px 14px rgba(72, 187, 120, 0.35);
+    }
+    .btn-primary:hover {
+      background: #5cd08c;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-light);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-danger {
+      background: rgba(217, 83, 79, 0.15);
+      color: #ff8a87;
+      border: 1px solid rgba(217, 83, 79, 0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(217, 83, 79, 0.28);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    /* Main Layout */
+    main {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ================= SETUP / BUILDER VIEW ================= */
+    .builder-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .builder-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--surface-card);
+      color: var(--text-dark);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .panel h2 {
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--bg-deep);
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--border-soft);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      background: #fff;
+      transition: border-color 0.15s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent-leaf);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 76px;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .json-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--surface-muted);
+    }
+
+    .question-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 68vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .q-item {
+      background: #fff;
+      border: 2px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .q-item-info {
+      flex: 1;
+    }
+
+    .q-item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tag-time { background: #e2e8f0; color: #334155; }
+    .tag-rapid { background: #fef3c7; color: #92400e; }
+    .tag-mute { background: #fee2e2; color: #991b1b; }
+    .tag-majority { background: #e0e7ff; color: #3730a3; }
+    .tag-closest { background: #d1fae5; color: #065f46; }
+    .tag-audio { background: #fce7f3; color: #9d174d; }
+
+    .q-item-text {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-dark);
+    }
+
+    .q-item-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* ================= STAGE / GAMEPLAY VIEW ================= */
+    .stage-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .stage-top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      font-weight: 700;
+      color: #a7cbb9;
+      font-size: 1.05rem;
+    }
+
+    .question-card {
+      background: var(--surface-card);
+      color: var(--text-dark);
+      width: 100%;
+      border-radius: 28px;
+      padding: 44px 52px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+      min-height: 430px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.25s ease;
+    }
+
+    /* Mode Banner at top of card */
+    .mode-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      align-self: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .mode-standard { background: #d1fae5; color: #065f46; }
+    .mode-rapid { background: #fef3c7; color: #b45309; }
+    .mode-mute { background: #fee2e2; color: #b91c1c; animation: pulseBorder 2s infinite; }
+    .mode-majority { background: #e0e7ff; color: #3730a3; }
+    .mode-closest { background: #ccfbf1; color: #0f766e; }
+
+    @keyframes pulseBorder {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35); }
+      50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+    }
+
+    .mode-instruction {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: -14px;
+      margin-bottom: 24px;
+    }
+
+    .question-text {
+      font-size: clamp(1.8rem, 3.6vw, 2.85rem);
+      font-weight: 800;
+      line-height: 1.22;
+      color: var(--bg-deep);
+      margin-bottom: 28px;
+    }
+
+    /* Audio / YouTube Player Box */
+    .audio-box {
+      background: var(--surface-muted);
+      border: 2px solid var(--border-soft);
+      border-radius: 16px;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .audio-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .equalizer {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 24px;
+    }
+
+    .equalizer span {
+      width: 5px;
+      height: 8px;
+      background: var(--accent-leaf);
+      border-radius: 3px;
+      transition: height 0.2s;
+    }
+
+    .equalizer.playing span {
+      animation: eqBounce 0.7s infinite ease-in-out alternate;
+    }
+    .equalizer.playing span:nth-child(2) { animation-delay: 0.2s; }
+    .equalizer.playing span:nth-child(3) { animation-delay: 0.4s; }
+    .equalizer.playing span:nth-child(4) { animation-delay: 0.15s; }
+
+    @keyframes eqBounce {
+      0% { height: 6px; }
+      100% { height: 24px; }
+    }
+
+    /* Keep YouTube iframe tiny/offscreen so song titles stay hidden */
+    #yt-hidden-wrapper {
+      position: fixed;
+      width: 1px;
+      height: 1px;
+      opacity: 0.01;
+      pointer-events: none;
+      bottom: 0;
+      right: 0;
+    }
+
+    /* Timer Section */
+    .timer-wrapper {
+      margin-top: auto;
+    }
+
+    .timer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .timer-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .timer-digits {
+      font-size: 2.2rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      color: var(--bg-deep);
+    }
+
+    .timer-digits.urgent {
+      color: var(--accent-coral);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 16px;
+      background: var(--surface-muted);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--accent-leaf), var(--accent-bright));
+      border-radius: 999px;
+      transition: width 0.25s linear, background 0.3s ease;
+    }
+
+    .progress-fill.urgent {
+      background: linear-gradient(90deg, #dc2626, #f87171);
+    }
+
+    /* TIME'S UP OVERLAY */
+    .times-up-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 36, 29, 0.96);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 32px;
+      z-index: 20;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .times-up-title {
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--accent-gold);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .times-up-sub {
+      font-size: 1.3rem;
+      color: #cbe3d6;
+      margin-bottom: 32px;
+    }
+
+    /* Stage Controls */
+    .stage-controls {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 22px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* End Screen */
+    .end-card {
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🌿</div>
+      <span>Canopy Trivia</span>
+    </div>
+    <div class="nav-actions">
+      <button id="btn-nav-builder" class="btn-secondary" onclick="switchView('builder')">🛠️ Question Builder</button>
+      <button id="btn-nav-play" class="btn-primary" onclick="startGame()">▶ Start Game</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= BUILDER VIEW ================= -->
+    <section id="view-builder" class="builder-grid">
+      <!-- Left: Add / Edit Question Form -->
+      <div class="panel">
+        <h2 id="form-title">🌱 Add Question</h2>
+        <input type="hidden" id="edit-index" value="-1" />
+
+        <div class="form-group">
+          <label for="q-text">Question Prompt</label>
+          <textarea id="q-text" placeholder="e.g., Name the song and artist playing right now!"></textarea>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label for="q-mode">Round Twist / Mode</label>
+            <select id="q-mode">
+              <option value="standard">Standard / Rapid Fire</option>
+              <option value="mute">🤫 Mute Round (No Talking)</option>
+              <option value="majority">🐑 Majority Rules</option>
+              <option value="closest">🎯 Closest Without Going Over</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="q-duration">Duration (Seconds)</label>
+            <input type="number" id="q-duration" value="20" min="3" max="300" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="q-youtube">YouTube URL or Video ID (Optional)</label>
+          <input type="text" id="q-youtube" placeholder="https://www.youtube.com/watch?v=..." />
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label for="q-start">Start Time (Sec)</label>
+            <input type="number" id="q-start" value="0" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="q-autoplay">Auto-Play Audio?</label>
+            <select id="q-autoplay">
+              <option value="true">Yes, on question load</option>
+              <option value="false">No, host clicks Play</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 18px;">
+          <button class="btn-primary" style="flex: 1; justify-content: center;" onclick="saveQuestion()">Save Question</button>
+          <button id="btn-cancel-edit" class="btn-secondary hidden" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="resetForm()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Right: Question Deck & JSON Import/Export -->
+      <div class="panel">
+        <h2>📋 Question Deck (<span id="q-count">0</span>)</h2>
+
+        <div class="json-toolbar">
+          <button class="btn-secondary btn-sm" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="document.getElementById('json-file-input').click()">📂 Import JSON</button>
+          <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importJSON(event)" />
+
+          <button class="btn-secondary btn-sm" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="exportJSON()">💾 Export JSON</button>
+          <button class="btn-secondary btn-sm" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="loadSampleDeck()">✨ Load Sample Deck</button>
+        </div>
+
+        <div id="question-list" class="question-list"></div>
+      </div>
+    </section>
+
+    <!-- ================= GAMEPLAY STAGE VIEW ================= -->
+    <section id="view-stage" class="stage-container hidden">
+      <div class="stage-top-bar">
+        <span id="stage-progress">Question 1 of 10</span>
+        <span>Shortcuts: [Space] Pause/Resume • [→] Next • [R] Replay Audio</span>
+      </div>
+
+      <div class="question-card" id="question-card">
+        <div>
+          <div id="stage-badge" class="mode-banner mode-standard">⚡ Rapid Fire</div>
+          <div id="stage-instruction" class="mode-instruction">Write down your answer before the clock hits zero!</div>
+          <div id="stage-question" class="question-text">Loading question...</div>
+        </div>
+
+        <!-- Audio Controls (shown only if YouTube URL is present) -->
+        <div id="stage-audio-box" class="audio-box hidden">
+          <div class="audio-info">
+            <div id="audio-eq" class="equalizer">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div>
+              <div style="font-weight: 800; color: var(--bg-deep);">Mystery Audio Track</div>
+              <div id="audio-status" style="font-size: 0.85rem; color: var(--text-muted);">Ready to play</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-audio-toggle" class="btn-primary btn-sm" onclick="toggleAudio()">▶ Play Audio</button>
+            <button class="btn-secondary btn-sm" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="restartAudio()">↺ Restart</button>
+          </div>
+        </div>
+
+        <!-- Countdown Bar -->
+        <div class="timer-wrapper">
+          <div class="timer-header">
+            <span class="timer-label">Time Remaining</span>
+            <span id="timer-digits" class="timer-digits">20s</span>
+          </div>
+          <div class="progress-track">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <!-- TIME'S UP OVERLAY -->
+        <div id="times-up-overlay" class="times-up-overlay hidden">
+          <div class="times-up-title">⏰ Time's Up!</div>
+          <div class="times-up-sub">Pens down! Lock in your answers.</div>
+          <button class="btn-primary" style="font-size: 1.15rem; padding: 14px 32px;" onclick="nextQuestion()">Next Question →</button>
+        </div>
+      </div>
+
+      <div class="stage-controls">
+        <div class="control-group">
+          <button class="btn-secondary" onclick="prevQuestion()">← Previous</button>
+          <button id="btn-pause-timer" class="btn-secondary" onclick="toggleTimerPause()">⏸ Pause Timer</button>
+          <button class="btn-secondary" onclick="resetCurrentTimer()">↺ Reset Timer</button>
+        </div>
+        <div class="control-group">
+          <button class="btn-primary" onclick="nextQuestion()">Next Question →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= END OF GAME VIEW ================= -->
+    <section id="view-end" class="stage-container hidden">
+      <div class="question-card end-card">
+        <div style="font-size: 4rem; margin-bottom: 12px;">🌲🏆🌲</div>
+        <div class="question-text" style="margin-bottom: 12px;">Round Complete!</div>
+        <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 32px;">
+          Collect the answer sheets and tally up the chaos.
+        </p>
+        <div style="display: flex; gap: 14px;">
+          <button class="btn-secondary" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="switchView('builder')">← Back to Builder</button>
+          <button class="btn-primary" onclick="startGame()">↻ Play Again</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Hidden YouTube Player -->
+  <div id="yt-hidden-wrapper">
+    <div id="yt-player"></div>
+  </div>
+
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <script>
+    // ================= STATE & SAMPLE DATA =================
+    const SAMPLE_QUESTIONS = [
+      {
+        text: "Rapid Fire: What is the only mammal capable of true sustained flight?",
+        mode: "standard",
+        duration: 12,
+        youtube: "",
+        start: 0,
+        autoplay: false
+      },
+      {
+        text: "Name the song and artist playing right now!",
+        mode: "standard",
+        duration: 20,
+        youtube: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        start: 43,
+        autoplay: true
+      },
+      {
+        text: "MUTE ROUND: Without making a sound or showing your phone, write down the 7 colors of the rainbow in order.",
+        mode: "mute",
+        duration: 25,
+        youtube: "",
+        start: 0,
+        autoplay: false
+      },
+      {
+        text: "MAJORITY RULES: What is the single best pizza topping? (Match the most popular answer in the room!)",
+        mode: "majority",
+        duration: 20,
+        youtube: "",
+        start: 0,
+        autoplay: false
+      },
+      {
+        text: "CLOSEST WITHOUT GOING OVER: How many dimples are on a regulation golf ball?",
+        mode: "closest",
+        duration: 20,
+        youtube: "",
+        start: 0,
+        autoplay: false
+      }
+    ];
+
+    let questions = [];
+    let currentIndex = 0;
+    let timerInterval = null;
+    let timeLeft = 0;
+    let totalDuration = 0;
+    let isPaused = false;
+
+    // YouTube API State
+    let ytPlayer = null;
+    let ytReady = false;
+    let pendingVideo = null;
+
+    // ================= INITIALIZATION =================
+    window.addEventListener("DOMContentLoaded", async () => {
+      // 1. Try auto-fetching questions.json (works seamlessly on GitHub Pages!)
+      try {
+        const res = await fetch("questions.json");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            questions = normalizeQuestions(data);
+            renderQuestionList();
+            return;
+          }
+        }
+      } catch (e) {
+        // Ignore if running locally without a server or no questions.json present
+      }
+
+      // 2. Otherwise check localStorage or fall back to sample deck
+      const saved = localStorage.getItem("canopy_trivia_questions");
+      if (saved) {
+        try {
+          questions = normalizeQuestions(JSON.parse(saved));
+        } catch {
+          questions = [...SAMPLE_QUESTIONS];
+        }
+      } else {
+        questions = [...SAMPLE_QUESTIONS];
+      }
+      renderQuestionList();
+    });
+
+    function normalizeQuestions(rawList) {
+      return rawList.map(q => ({
+        text: q.text || q.question || "Untitled Question",
+        mode: ["standard", "mute", "majority", "closest"].includes(q.mode) ? q.mode : "standard",
+        duration: Number(q.duration) || 20,
+        youtube: q.youtube || q.audio || "",
+        start: Number(q.start) || 0,
+        autoplay: q.autoplay !== undefined ? Boolean(q.autoplay) : true
+      }));
+    }
+
+    function persistQuestions() {
+      localStorage.setItem("canopy_trivia_questions", JSON.stringify(questions));
+    }
+
+    // ================= YOUTUBE PLAYER SETUP =================
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player("yt-player", {
+        height: "1",
+        width: "1",
+        videoId: "",
+        playerVars: {
+          playsinline: 1,
+          controls: 0,
+          disablekb: 1
+        },
+        events: {
+          onReady: () => {
+            ytReady = true;
+            if (pendingVideo) {
+              cueOrPlayYouTube(pendingVideo.id, pendingVideo.start, pendingVideo.autoplay);
+              pendingVideo = null;
+            }
+          },
+          onStateChange: (event) => {
+            const eq = document.getElementById("audio-eq");
+            const status = document.getElementById("audio-status");
+            const btn = document.getElementById("btn-audio-toggle");
+            if (event.data === YT.PlayerState.PLAYING) {
+              eq.classList.add("playing");
+              status.textContent = "Playing audio...";
+              btn.textContent = "⏸ Pause Audio";
+            } else {
+              eq.classList.remove("playing");
+              status.textContent = "Paused / Ready";
+              btn.textContent = "▶ Play Audio";
+            }
+          }
+        }
+      });
+    }
+
+    function extractYouTubeID(input) {
+      if (!input) return null;
+      const trimmed = input.trim();
+      if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+      const match = trimmed.match(/(?:v=|\/embed\/|\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return match ? match[1] : null;
+    }
+
+    function cueOrPlayYouTube(videoId, startSeconds, autoplay) {
+      if (!ytReady || !ytPlayer) {
+        pendingVideo = { id: videoId, start: startSeconds, autoplay };
+        return;
+      }
+      if (autoplay) {
+        ytPlayer.loadVideoById({ videoId, startSeconds });
+      } else {
+        ytPlayer.cueVideoById({ videoId, startSeconds });
+      }
+    }
+
+    function stopYouTube() {
+      if (ytReady && ytPlayer && typeof ytPlayer.stopVideo === "function") {
+        ytPlayer.stopVideo();
+      }
+      document.getElementById("audio-eq").classList.remove("playing");
+    }
+
+    function toggleAudio() {
+      if (!ytReady || !ytPlayer) return;
+      const state = ytPlayer.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    }
+
+    function restartAudio() {
+      const q = questions[currentIndex];
+      const vid = extractYouTubeID(q.youtube);
+      if (vid && ytReady && ytPlayer) {
+        ytPlayer.seekTo(q.start || 0, true);
+        ytPlayer.playVideo();
+      }
+    }
+
+    // ================= SOUND EFFECT (WEB AUDIO CHIME) =================
+    function playTimesUpChime() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [523.25, 392.00]; // C5 -> G4 clean two-tone buzzer
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.18);
+          gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.18);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.18 + 0.45);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.18);
+          osc.stop(ctx.currentTime + idx * 0.18 + 0.45);
+        });
+      } catch (e) {
+        // Audio context blocked or unsupported
+      }
+    }
+
+    // ================= BUILDER UI LOGIC =================
+    function renderQuestionList() {
+      const listEl = document.getElementById("question-list");
+      document.getElementById("q-count").textContent = questions.length;
+      listEl.innerHTML = "";
+
+      if (questions.length === 0) {
+        listEl.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 24px;">No questions yet. Add one on the left or import a JSON file!</p>`;
+        return;
+      }
+
+      const modeLabels = {
+        standard: { label: "⚡ Rapid Fire", cls: "tag-rapid" },
+        mute: { label: "🤫 Mute Round", cls: "tag-mute" },
+        majority: { label: "🐑 Majority Rules", cls: "tag-majority" },
+        closest: { label: "🎯 Closest W/O Over", cls: "tag-closest" }
+      };
+
+      questions.forEach((q, idx) => {
+        const m = modeLabels[q.mode] || modeLabels.standard;
+        const hasAudio = Boolean(extractYouTubeID(q.youtube));
+        const item = document.createElement("div");
+        item.className = "q-item";
+        item.innerHTML = `
+          <div class="q-item-info">
+            <div class="q-item-meta">
+              <strong style="color: var(--text-muted);">#${idx + 1}</strong>
+              <span class="tag ${m.cls}">${m.label}</span>
+              <span class="tag tag-time">⏱ ${q.duration}s</span>
+              ${hasAudio ? `<span class="tag tag-audio">🎵 Audio (${q.start}s)</span>` : ""}
+            </div>
+            <div class="q-item-text">${escapeHTML(q.text)}</div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-secondary btn-sm" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="moveQuestion(${idx}, -1)" title="Move Up">↑</button>
+            <button class="btn-secondary btn-sm" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="moveQuestion(${idx}, 1)" title="Move Down">↓</button>
+            <button class="btn-secondary btn-sm" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="editQuestion(${idx})">Edit</button>
+            <button class="btn-danger btn-sm" onclick="deleteQuestion(${idx})">✕</button>
+          </div>
+        `;
+        listEl.appendChild(item);
+      });
+    }
+
+    function saveQuestion() {
+      const text = document.getElementById("q-text").value.trim();
+      if (!text) {
+        alert("Please enter a question prompt.");
+        return;
+      }
+
+      const qObj = {
+        text,
+        mode: document.getElementById("q-mode").value,
+        duration: Math.max(3, parseInt(document.getElementById("q-duration").value, 10) || 20),
+        youtube: document.getElementById("q-youtube").value.trim(),
+        start: Math.max(0, parseInt(document.getElementById("q-start").value, 10) || 0),
+        autoplay: document.getElementById("q-autoplay").value === "true"
+      };
+
+      const editIdx = parseInt(document.getElementById("edit-index").value, 10);
+      if (editIdx >= 0) {
+        questions[editIdx] = qObj;
+      } else {
+        questions.push(qObj);
+      }
+
+      persistQuestions();
+      resetForm();
+      renderQuestionList();
+    }
+
+    function editQuestion(idx) {
+      const q = questions[idx];
+      document.getElementById("edit-index").value = idx;
+      document.getElementById("form-title").textContent = `✏️ Edit Question #${idx + 1}`;
+      document.getElementById("q-text").value = q.text;
+      document.getElementById("q-mode").value = q.mode;
+      document.getElementById("q-duration").value = q.duration;
+      document.getElementById("q-youtube").value = q.youtube;
+      document.getElementById("q-start").value = q.start;
+      document.getElementById("q-autoplay").value = String(q.autoplay);
+      document.getElementById("btn-cancel-edit").classList.remove("hidden");
+    }
+
+    function resetForm() {
+      document.getElementById("edit-index").value = "-1";
+      document.getElementById("form-title").textContent = "🌱 Add Question";
+      document.getElementById("q-text").value = "";
+      document.getElementById("q-mode").value = "standard";
+      document.getElementById("q-duration").value = 20;
+      document.getElementById("q-youtube").value = "";
+      document.getElementById("q-start").value = 0;
+      document.getElementById("q-autoplay").value = "true";
+      document.getElementById("btn-cancel-edit").classList.add("hidden");
+    }
+
+    function deleteQuestion(idx) {
+      questions.splice(idx, 1);
+      persistQuestions();
+      renderQuestionList();
+    }
+
+    function moveQuestion(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= questions.length) return;
+      [questions[idx], questions[target]] = [questions[target], questions[idx]];
+      persistQuestions();
+      renderQuestionList();
+    }
+
+    function loadSampleDeck() {
+      questions = [...SAMPLE_QUESTIONS];
+      persistQuestions();
+      renderQuestionList();
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(questions, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "questions.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!Array.isArray(parsed)) throw new Error("JSON must be an array of questions.");
+          questions = normalizeQuestions(parsed);
+          persistQuestions();
+          renderQuestionList();
+        } catch (err) {
+          alert("Invalid JSON file: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    // ================= GAMEPLAY ENGINE =================
+    function switchView(viewName) {
+      clearInterval(timerInterval);
+      stopYouTube();
+      document.getElementById("view-builder").classList.toggle("hidden", viewName !== "builder");
+      document.getElementById("view-stage").classList.toggle("hidden", viewName !== "stage");
+      document.getElementById("view-end").classList.toggle("hidden", viewName !== "end");
+    }
+
+    function startGame() {
+      if (questions.length === 0) {
+        alert("Add at least one question before starting!");
+        return;
+      }
+      currentIndex = 0;
+      switchView("stage");
+      loadQuestion(0);
+    }
+
+    function loadQuestion(idx) {
+      clearInterval(timerInterval);
+      stopYouTube();
+      isPaused = false;
+      document.getElementById("btn-pause-timer").textContent = "⏸ Pause Timer";
+      document.getElementById("times-up-overlay").classList.add("hidden");
+
+      const q = questions[idx];
+      document.getElementById("stage-progress").textContent = `Question ${idx + 1} of ${questions.length}`;
+      document.getElementById("stage-question").textContent = q.text;
+
+      // Mode styling & instructions
+      const badge = document.getElementById("stage-badge");
+      const inst = document.getElementById("stage-instruction");
+      badge.className = "mode-banner";
+
+      if (q.mode === "mute") {
+        badge.classList.add("mode-mute");
+        badge.textContent = "🤫 MUTE ROUND";
+        inst.textContent = "NO talking, whispering, or showing phones! Gestures only.";
+      } else if (q.mode === "majority") {
+        badge.classList.add("mode-majority");
+        badge.textContent = "🐑 MAJORITY RULES";
+        inst.textContent = "No right answer—score points by matching the most popular answer in the room!";
+      } else if (q.mode === "closest") {
+        badge.classList.add("mode-closest");
+        badge.textContent = "🎯 CLOSEST WITHOUT GOING OVER";
+        inst.textContent = "Guess as close as possible without going over—going over by even 1 gets zero!";
+      } else {
+        badge.classList.add("mode-rapid");
+        badge.textContent = "⚡ RAPID FIRE";
+        inst.textContent = "Answer fast! The screen locks automatically when time runs out.";
+      }
+
+      // YouTube Audio setup
+      const audioBox = document.getElementById("stage-audio-box");
+      const vid = extractYouTubeID(q.youtube);
+      if (vid) {
+        audioBox.classList.remove("hidden");
+        document.getElementById("audio-status").textContent = q.autoplay ? "Starting audio..." : "Click Play Audio to start";
+        document.getElementById("btn-audio-toggle").textContent = "▶ Play Audio";
+        cueOrPlayYouTube(vid, q.start || 0, q.autoplay);
+      } else {
+        audioBox.classList.add("hidden");
+      }
+
+      // Start Timer
+      totalDuration = q.duration;
+      timeLeft = q.duration;
+      updateTimerUI();
+      startCountdown();
+    }
+
+    function startCountdown() {
+      clearInterval(timerInterval);
+      const tickRate = 100; // smooth 100ms updates
+      timerInterval = setInterval(() => {
+        if (isPaused) return;
+        timeLeft = Math.max(0, +(timeLeft - 0.1).toFixed(1));
+        updateTimerUI();
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimesUp();
+        }
+      }, tickRate);
+    }
+
+    function updateTimerUI() {
+      const digits = document.getElementById("timer-digits");
+      const fill = document.getElementById("progress-fill");
+      const pct = totalDuration > 0 ? (timeLeft / totalDuration) * 100 : 0;
+
+      digits.textContent = `${Math.ceil(timeLeft)}s`;
+      fill.style.width = `${pct}%`;
+
+      const isUrgent = timeLeft <= 5 && timeLeft > 0;
+      digits.classList.toggle("urgent", isUrgent);
+      fill.classList.toggle("urgent", isUrgent);
+    }
+
+    function handleTimesUp() {
+      stopYouTube();
+      playTimesUpChime();
+      document.getElementById("times-up-overlay").classList.remove("hidden");
+    }
+
+    function toggleTimerPause() {
+      isPaused = !isPaused;
+      document.getElementById("btn-pause-timer").textContent = isPaused ? "▶ Resume Timer" : "⏸ Pause Timer";
+    }
+
+    function resetCurrentTimer() {
+      document.getElementById("times-up-overlay").classList.add("hidden");
+      isPaused = false;
+      document.getElementById("btn-pause-timer").textContent = "⏸ Pause Timer";
+      timeLeft = totalDuration;
+      updateTimerUI();
+      startCountdown();
+    }
+
+    function nextQuestion() {
+      if (currentIndex + 1 < questions.length) {
+        currentIndex++;
+        loadQuestion(currentIndex);
+      } else {
+        switchView("end");
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadQuestion(currentIndex);
+      }
+    }
+
+    // Keyboard shortcuts for smooth hosting
+    document.addEventListener("keydown", (e) => {
+      const stageVisible = !document.getElementById("view-stage").classList.contains("hidden");
+      if (!stageVisible) return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        toggleTimerPause();
+      } else if (e.code === "ArrowRight") {
+        nextQuestion();
+      } else if (e.code === "ArrowLeft") {
+        prevQuestion();
+      } else if (e.key.toLowerCase() === "r") {
+        restartAudio();
+      }
+    });
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+  </script>
+</body>
+</html>
