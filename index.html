@@ -304,7 +304,7 @@
 
     .tag-time { background: #e2e8f0; color: #334155; }
     .tag-unlimited { background: #e0f2fe; color: #0369a1; }
-    .tag-rapid { background: #fef3c7; color: #92400e; }
+    .tag-standard { background: #fef3c7; color: #92400e; }
     .tag-mute { background: #fee2e2; color: #991b1b; }
     .tag-majority { background: #e0e7ff; color: #3730a3; }
     .tag-closest { background: #d1fae5; color: #065f46; }
@@ -376,8 +376,7 @@
       border: 3px solid rgba(0, 0, 0, 0.06);
     }
 
-    .huge-banner-standard { background: #e6f4ea; color: #137333; border-color: #ceead6; }
-    .huge-banner-rapid { background: #fef7e0; color: #b06000; border-color: #fce8b2; }
+    .huge-banner-standard { background: #fef7e0; color: #b06000; border-color: #fce8b2; }
     .huge-banner-mute { background: #fce8e6; color: #c5221f; border-color: #fadcbc; animation: pulseBanner 2s infinite; }
     .huge-banner-majority { background: #e8eaed; color: #202124; border-color: #dadce0; }
     .huge-banner-closest { background: #e4f7f0; color: #0d652d; border-color: #cef1e3; }
@@ -612,7 +611,7 @@
           <div class="form-group">
             <label for="q-mode">Round Twist / Mode</label>
             <select id="q-mode">
-              <option value="standard">Standard / Rapid Fire</option>
+              <option value="standard">Standard / Timed</option>
               <option value="mute">🤫 Mute Round (No Talking)</option>
               <option value="majority">🐑 Majority Rules</option>
               <option value="closest">🎯 Closest Without Going Over</option>
@@ -683,11 +682,11 @@
 
       <div class="question-card" id="question-card">
         <div>
-          <!-- MASSIVE GAME MODE BANNER AT THE TOP -->
+          <!-- MASSIVE GAME MODE BANNER AT THE TOP (Hidden if untimed and standard) -->
           <div id="huge-banner" class="huge-mode-banner huge-banner-standard">
-            <div id="banner-icon" class="banner-icon">⚡</div>
+            <div id="banner-icon" class="banner-icon">⏰</div>
             <div class="banner-text-wrap">
-              <span id="banner-title">Rapid Fire Round</span>
+              <span id="banner-title">Timed Question</span>
               <span id="banner-sub" class="banner-sub">Write down your answers before time runs out!</span>
             </div>
           </div>
@@ -712,8 +711,8 @@
           </div>
         </div>
 
-        <!-- Countdown Bar -->
-        <div class="timer-wrapper">
+        <!-- Countdown Bar (Hidden if unlimited) -->
+        <div id="timer-container" class="timer-wrapper">
           <div class="timer-header">
             <span class="timer-label" id="timer-title-label">Time Remaining</span>
             <span id="timer-digits" class="timer-digits">20s</span>
@@ -787,6 +786,14 @@
         autoplay: true
       },
       {
+        text: "Discussion Question: What team has the most creative strategy?",
+        mode: "standard",
+        duration: 0,
+        youtube: "",
+        start: 0,
+        autoplay: false
+      },
+      {
         text: "Write down the 7 colors of the rainbow in order.",
         mode: "mute",
         duration: 25,
@@ -839,7 +846,7 @@
         }
       } catch (e) {}
 
-      const saved = localStorage.getItem("canopy_trivia_questions_v3");
+      const saved = localStorage.getItem("canopy_trivia_questions_v4");
       if (saved) {
         try {
           questions = normalizeQuestions(JSON.parse(saved));
@@ -864,7 +871,7 @@
     }
 
     function persistQuestions() {
-      localStorage.setItem("canopy_trivia_questions_v3", JSON.stringify(questions));
+      localStorage.setItem("canopy_trivia_questions_v4", JSON.stringify(questions));
     }
 
     function toggleUnlimitedDuration() {
@@ -994,8 +1001,8 @@
         return;
       }
 
-      const modeLabels = {
-        standard: { label: "⚡ Standard", cls: "tag-rapid" },
+const modeLabels = {
+        standard: { label: "📄 Standard", cls: "tag-standard" },
         mute: { label: "🤫 Mute Round", cls: "tag-mute" },
         majority: { label: "🐑 Majority", cls: "tag-majority" },
         closest: { label: "🎯 Closest W/O Over", cls: "tag-closest" },
@@ -1006,13 +1013,14 @@
         const m = modeLabels[q.mode] || modeLabels.standard;
         const hasAudio = Boolean(extractYouTubeID(q.youtube));
         const isUnlimited = q.duration === 0;
+        const displayLabel = (q.mode === "standard" && isUnlimited) ? { label: "📄 Standard", cls: "tag-standard" } : m;
         const item = document.createElement("div");
         item.className = "q-item";
         item.innerHTML = `
           <div class="q-item-info">
             <div class="q-item-meta">
               <strong style="color: var(--text-muted);">#${idx + 1}</strong>
-              <span class="tag ${m.cls}">${m.label}</span>
+              <span class="tag ${displayLabel.cls}">${displayLabel.label}</span>
               ${isUnlimited ? '<span class="tag tag-unlimited">∞ Unlimited</span>' : `<span class="tag tag-time">⏱ ${q.duration}s</span>`}
               ${hasAudio ? `<span class="tag tag-audio">🎵 Audio (${q.start}s)</span>` : ""}
             </div>
@@ -1173,12 +1181,18 @@
       document.getElementById("stage-progress").textContent = `Question ${idx + 1} of ${questions.length}`;
       document.getElementById("stage-question").textContent = q.text;
 
-      // Massive Banner Styling & Subtitles
+      // Banner & Timer Visibility Setup
       const banner = document.getElementById("huge-banner");
+      const timerContainer = document.getElementById("timer-container");
       const icon = document.getElementById("banner-icon");
       const title = document.getElementById("banner-title");
       const sub = document.getElementById("banner-sub");
 
+      const isUnlimited = q.duration === 0;
+
+      // Show banner and timer
+      banner.classList.remove("hidden");
+      timerContainer.classList.remove("hidden");
       banner.className = "huge-mode-banner";
 
       if (q.mode === "mute") {
@@ -1201,11 +1215,14 @@
         icon.textContent = "🎯";
         title.textContent = "Closest to Right Answer Wins";
         sub.textContent = "Absolute closest guess to the real number wins the points!";
+      } else if (!isUnlimited) {
+        banner.classList.add("huge-banner-standard");
+        icon.textContent = "⏰";
+        title.textContent = "Timed Question";
+        sub.textContent = "Write down your answers before time runs out!";
       } else {
-        banner.classList.add("huge-banner-rapid");
-        icon.textContent = "⚡";
-        title.textContent = "Rapid Fire Round";
-        sub.textContent = "Write down your answers before the clock runs out!";
+        banner.classList.add("hidden");
+        timerContainer.classList.add("hidden");
       }
 
       // YouTube Audio setup & smart sync
@@ -1218,7 +1235,7 @@
         document.getElementById("audio-status").textContent = q.autoplay ? "Buffering audio..." : "Click Play Audio to start";
         document.getElementById("btn-audio-toggle").textContent = "▶ Play Audio";
         
-        if (q.autoplay && q.duration > 0) {
+        if (q.autoplay && !isUnlimited) {
           shouldWaitForAudio = true;
           timerWaitingForAudio = true;
         }
@@ -1227,15 +1244,11 @@
         audioBox.classList.add("hidden");
       }
 
-      // Setup Timer / Unlimited State
+      // Setup Timer State
       totalDuration = q.duration;
       timeLeft = q.duration;
 
-      if (q.duration === 0) {
-        document.getElementById("timer-title-label").textContent = "Timer Mode";
-        document.getElementById("timer-digits").textContent = "∞ Unlimited";
-        document.getElementById("progress-fill").style.width = "100%";
-      } else {
+      if (!isUnlimited) {
         document.getElementById("timer-title-label").textContent = "Time Remaining";
         if (shouldWaitForAudio) {
           document.getElementById("timer-digits").textContent = "Buffering...";
