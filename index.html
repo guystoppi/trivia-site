@@ -234,6 +234,16 @@
       gap: 12px;
     }
 
+    .builder-intro { color: var(--text-muted); font-size: .9rem; margin: -8px 0 18px; }
+    .media-options { border: 1px solid var(--border-soft); border-radius: 12px; padding: 12px 14px; margin-top: 8px; background: #edf5ef; }
+    .media-options summary { cursor: pointer; color: var(--bg-deep); font-weight: 750; list-style-position: inside; }
+    .media-options[open] summary { margin-bottom: 14px; }
+    .media-help { color: var(--text-muted); font-size: .8rem; line-height: 1.4; margin-top: 5px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .stage-image-wrap { display: flex; justify-content: center; margin: 0 0 24px; }
+    .stage-image { max-width: min(100%, 760px); max-height: 42vh; object-fit: contain; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+    @media (max-width: 600px) { .panel { padding: 18px; } .row-2 { grid-template-columns: 1fr; gap: 0; } }
+
     .checkbox-row {
       display: flex;
       align-items: center;
@@ -470,6 +480,28 @@
       right: 0;
     }
 
+    .audio-box.drive-embedded {
+      display: block;
+    }
+
+    .drive-audio-embed {
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .drive-audio-embed iframe {
+      display: block;
+      width: 100%;
+      height: 180px;
+      border: 0;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .drive-audio-embed .media-help {
+      margin-top: 8px;
+    }
+
     /* Timer Section */
     .timer-wrapper {
       margin-top: auto;
@@ -600,56 +632,70 @@
       <!-- Left: Add / Edit Question Form -->
       <div class="panel">
         <h2 id="form-title">🌱 Add Question</h2>
+        <p class="builder-intro">Start with the question. Add a twist or media only if you need it.</p>
         <input type="hidden" id="edit-index" value="-1" />
 
         <div class="form-group">
-          <label for="q-text">Question Prompt</label>
+          <label for="q-text">Question</label>
           <textarea id="q-text" placeholder="e.g., What year was the Eiffel Tower completed?"></textarea>
         </div>
 
         <div class="row-2">
           <div class="form-group">
-            <label for="q-mode">Round Twist / Mode</label>
+            <label for="q-mode">Round Type</label>
             <select id="q-mode">
-              <option value="standard">Standard / Timed</option>
-              <option value="mute">🤫 Mute Round (No Talking)</option>
+              <option value="standard">Standard</option>
+              <option value="mute">🤫 Mute Round</option>
               <option value="majority">🐑 Majority Rules</option>
               <option value="closest">🎯 Closest Without Going Over</option>
-              <option value="exact">🎯 Closest to Right Answer Wins</option>
+              <option value="exact">🎯 Closest to Right Answer</option>
             </select>
           </div>
-
           <div class="form-group">
-            <label for="q-duration">Duration (Seconds)</label>
+            <label for="q-duration">Time Limit</label>
             <input type="number" id="q-duration" value="20" min="1" max="300" />
           </div>
         </div>
 
-        <div class="form-group" style="margin-top: -4px; margin-bottom: 14px;">
-          <label class="checkbox-row">
-            <input type="checkbox" id="q-unlimited" onchange="toggleUnlimitedDuration()" />
-            <span>Unlimited Time (Manual Advance, No Timer)</span>
-          </label>
-        </div>
+        <label class="checkbox-row" style="margin: 0 0 8px;">
+          <input type="checkbox" id="q-unlimited" onchange="toggleUnlimitedDuration()" />
+          <span>No time limit</span>
+        </label>
+        <label class="checkbox-row" style="margin: 0 0 16px;">
+          <input type="checkbox" id="q-manual-timer" />
+          <span>Wait for host to press “Go” before starting the timer</span>
+        </label>
 
-        <div class="form-group">
-          <label for="q-youtube">YouTube URL or Video ID (Optional)</label>
-          <input type="text" id="q-youtube" placeholder="https://www.youtube.com/watch?v=..." />
-        </div>
-
-        <div class="row-2">
+        <details class="media-options" id="media-options">
+          <summary>🎵 Media (optional) — audio and images</summary>
           <div class="form-group">
-            <label for="q-start">Start Time (Sec)</label>
-            <input type="number" id="q-start" value="0" min="0" />
+            <label for="q-youtube">YouTube URL (optional)</label>
+            <input type="text" id="q-youtube" placeholder="Paste a YouTube link" />
           </div>
           <div class="form-group">
-            <label for="q-autoplay">Auto-Play Audio?</label>
-            <select id="q-autoplay">
-              <option value="true">Yes, on question load</option>
-              <option value="false">No, host clicks Play</option>
-            </select>
+            <label for="q-drive-audio">Google Drive audio link (optional)</label>
+            <input type="text" id="q-drive-audio" placeholder="Share link to an MP3, WAV, etc." />
+            <p class="media-help">Set the file to “Anyone with the link”. Google Drive uses its own embedded player; YouTube is used if both audio fields are filled in.</p>
           </div>
-        </div>
+          <div class="form-group">
+            <label for="q-drive-image">Google Drive image link (optional)</label>
+            <input type="text" id="q-drive-image" placeholder="Share link to a JPG, PNG, GIF, etc." />
+          </div>
+          <p class="media-help">The start offset and game-controlled audio buttons apply to YouTube only. Drive audio uses the embedded Google player, where you can seek and restart manually.</p>
+          <div class="row-2">
+            <div class="form-group">
+              <label for="q-start">Audio Start (seconds, YouTube only)</label>
+              <input type="number" id="q-start" value="0" min="0" />
+            </div>
+            <div class="form-group">
+              <label for="q-autoplay">Start audio automatically?</label>
+              <select id="q-autoplay">
+                <option value="true">Yes</option>
+                <option value="false">No — host starts it</option>
+              </select>
+            </div>
+          </div>
+        </details>
 
         <div style="display: flex; gap: 10px; margin-top: 18px;">
           <button class="btn-primary" style="flex: 1; justify-content: center;" onclick="saveQuestion()">Save Question</button>
@@ -692,11 +738,12 @@
           </div>
 
           <div id="stage-question" class="question-text">Loading question...</div>
+          <div id="stage-image-wrap" class="stage-image-wrap hidden"><img id="stage-image" class="stage-image" alt="Question image" /></div>
         </div>
 
-        <!-- Audio Controls (shown only if YouTube URL is present) -->
+        <!-- Audio: YouTube uses game controls; Google Drive uses its embedded player -->
         <div id="stage-audio-box" class="audio-box hidden">
-          <div class="audio-info">
+          <div class="audio-info" id="audio-info">
             <div id="audio-eq" class="equalizer">
               <span></span><span></span><span></span><span></span>
             </div>
@@ -705,9 +752,13 @@
               <div id="audio-status" style="font-size: 0.85rem; color: var(--text-muted);">Ready to play</div>
             </div>
           </div>
-          <div style="display: flex; gap: 8px;">
+          <div id="audio-action-buttons" style="display: flex; gap: 8px;">
             <button id="btn-audio-toggle" class="btn-primary btn-sm" onclick="toggleAudio()">▶ Play Audio</button>
             <button class="btn-secondary btn-sm" style="color: var(--text-dark); border-color: var(--border-soft);" onclick="restartAudio()">↺ Restart</button>
+          </div>
+          <div id="drive-audio-embed" class="drive-audio-embed hidden">
+            <iframe id="drive-audio-frame" title="Google Drive audio player" allow="autoplay; encrypted-media" loading="eager" referrerpolicy="no-referrer"></iframe>
+            <p class="media-help">Use the player above to play, pause, seek, or restart the track. Its controls are separate from the trivia timer.</p>
           </div>
         </div>
 
@@ -733,6 +784,7 @@
       <div class="stage-controls">
         <div class="control-group">
           <button class="btn-secondary" onclick="prevQuestion()">← Previous</button>
+          <button id="btn-start-timer" class="btn-primary" onclick="beginCurrentTimer()" style="display:none;">▶ Go — Start Timer</button>
           <button id="btn-pause-timer" class="btn-secondary" onclick="toggleTimerPause()">⏸ Pause Timer</button>
           <button class="btn-secondary" onclick="resetCurrentTimer()">↺ Reset Timer</button>
         </div>
@@ -762,6 +814,7 @@
   <div id="yt-hidden-wrapper">
     <div id="yt-player"></div>
   </div>
+  <audio id="drive-audio-player" preload="auto"></audio>
 
   <!-- YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api"></script>
@@ -826,6 +879,7 @@
     let totalDuration = 0;
     let isPaused = false;
     let timerWaitingForAudio = false;
+    let timerStarted = false;
 
     // YouTube API State
     let ytPlayer = null;
@@ -865,8 +919,11 @@
         mode: ["standard", "mute", "majority", "closest", "exact"].includes(q.mode) ? q.mode : "standard",
         duration: q.duration !== undefined ? Number(q.duration) : 20,
         youtube: q.youtube || q.audio || "",
+        driveAudio: q.driveAudio || q.googleDriveAudio || "",
+        driveImage: q.driveImage || q.googleDriveImage || "",
         start: Number(q.start) || 0,
-        autoplay: q.autoplay !== undefined ? Boolean(q.autoplay) : true
+        autoplay: q.autoplay !== undefined ? Boolean(q.autoplay) : true,
+        manualTimerStart: Boolean(q.manualTimerStart)
       }));
     }
 
@@ -944,31 +1001,124 @@
       }
     }
 
+    function googleDriveFileId(input) {
+      if (!input) return null;
+      const value = input.trim();
+      if (/^[a-zA-Z0-9_-]{15,}$/.test(value)) return value;
+      const match = value.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*?id=)|docs\.google\.com\/[^/]+\/d\/)([a-zA-Z0-9_-]+)/);
+      return match ? match[1] : null;
+    }
+
+    function googleDriveMediaUrl(input, kind) {
+      const id = googleDriveFileId(input);
+      if (id) return kind === "image"
+        ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`
+        : `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`;
+      return input && /^https?:\/\//i.test(input.trim()) ? input.trim() : "";
+    }
+
+    function googleDrivePreviewUrl(input, autoplay) {
+      const id = googleDriveFileId(input);
+      if (!id) return "";
+      return `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview${autoplay ? "?autoplay=1" : ""}`;
+    }
+
+    function showDriveAudioEmbed(url) {
+      const box = document.getElementById("stage-audio-box");
+      const embed = document.getElementById("drive-audio-embed");
+      let frame = document.getElementById("drive-audio-frame");
+
+      // Give each question a fresh Drive iframe. Reusing one after navigating
+      // it to about:blank can leave the next preview as a white frame.
+      const freshFrame = frame.cloneNode(false);
+      freshFrame.removeAttribute("src");
+      frame.replaceWith(freshFrame);
+      frame = freshFrame;
+
+      box.classList.add("drive-embedded");
+      document.getElementById("audio-info").classList.add("hidden");
+      document.getElementById("audio-action-buttons").classList.add("hidden");
+      embed.classList.remove("hidden");
+      frame.src = url;
+    }
+
+    function hideDriveAudioEmbed() {
+      const box = document.getElementById("stage-audio-box");
+      const embed = document.getElementById("drive-audio-embed");
+      const frame = document.getElementById("drive-audio-frame");
+      if (frame) frame.src = "about:blank";
+      embed.classList.add("hidden");
+      box.classList.remove("drive-embedded");
+      document.getElementById("audio-info").classList.remove("hidden");
+      document.getElementById("audio-action-buttons").classList.remove("hidden");
+    }
+
     function stopYouTube() {
-      if (ytReady && ytPlayer && typeof ytPlayer.stopVideo === "function") {
-        ytPlayer.stopVideo();
-      }
+      if (ytReady && ytPlayer && typeof ytPlayer.stopVideo === "function") ytPlayer.stopVideo();
+      hideDriveAudioEmbed();
+      const audio = document.getElementById("drive-audio-player");
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
       document.getElementById("audio-eq").classList.remove("playing");
     }
 
     function toggleAudio() {
+      const q = questions[currentIndex];
+      const driveAudio = googleDriveMediaUrl(q.driveAudio, "audio");
+      if (!extractYouTubeID(q.youtube) && driveAudio) {
+        const audio = document.getElementById("drive-audio-player");
+        if (audio.paused) audio.play().catch(() => {
+          document.getElementById("audio-status").textContent = "Could not play file — check its sharing settings and format";
+        });
+        else audio.pause();
+        return;
+      }
       if (!ytReady || !ytPlayer) return;
       const state = ytPlayer.getPlayerState();
-      if (state === YT.PlayerState.PLAYING) {
-        ytPlayer.pauseVideo();
-      } else {
-        ytPlayer.playVideo();
-      }
+      if (state === YT.PlayerState.PLAYING) ytPlayer.pauseVideo();
+      else ytPlayer.playVideo();
     }
 
     function restartAudio() {
       const q = questions[currentIndex];
+      const driveAudio = googleDriveMediaUrl(q.driveAudio, "audio");
+      if (!extractYouTubeID(q.youtube) && driveAudio) {
+        const audio = document.getElementById("drive-audio-player");
+        audio.currentTime = Math.max(0, Number(q.start) || 0);
+        audio.play().catch(() => {});
+        return;
+      }
       const vid = extractYouTubeID(q.youtube);
       if (vid && ytReady && ytPlayer) {
         ytPlayer.seekTo(q.start || 0, true);
         ytPlayer.playVideo();
       }
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const audio = document.getElementById("drive-audio-player");
+      audio.addEventListener("playing", () => {
+        document.getElementById("audio-eq").classList.add("playing");
+        document.getElementById("audio-status").textContent = "Playing audio...";
+        document.getElementById("btn-audio-toggle").textContent = "⏸ Pause Audio";
+        if (timerWaitingForAudio) { timerWaitingForAudio = false; startCountdown(); }
+      });
+      audio.addEventListener("pause", () => {
+        document.getElementById("audio-eq").classList.remove("playing");
+        document.getElementById("audio-status").textContent = "Paused";
+        document.getElementById("btn-audio-toggle").textContent = "▶ Play Audio";
+      });
+      audio.addEventListener("ended", () => {
+        document.getElementById("audio-eq").classList.remove("playing");
+        document.getElementById("audio-status").textContent = "Audio finished";
+        document.getElementById("btn-audio-toggle").textContent = "▶ Play Audio";
+      });
+      audio.addEventListener("error", () => {
+        document.getElementById("audio-status").textContent = "Unable to load file — check link permissions and format";
+        if (timerWaitingForAudio) { timerWaitingForAudio = false; startCountdown(); }
+      });
+    });
 
     // ================= SOUND EFFECT (WEB AUDIO CHIME) =================
     function playTimesUpChime() {
@@ -1011,7 +1161,7 @@
 
       questions.forEach((q, idx) => {
         const m = modeLabels[q.mode] || modeLabels.standard;
-        const hasAudio = Boolean(extractYouTubeID(q.youtube));
+        const hasAudio = Boolean(extractYouTubeID(q.youtube) || q.driveAudio);
         const isUnlimited = q.duration === 0;
         const displayLabel = (q.mode === "standard" && isUnlimited)
           ? { label: "📄 Standard", cls: "tag-standard" }
@@ -1025,7 +1175,8 @@
               <strong style="color: var(--text-muted);">#${idx + 1}</strong>
               <span class="tag ${displayLabel.cls}">${displayLabel.label}</span>
               ${isUnlimited ? '<span class="tag tag-unlimited">∞ Unlimited</span>' : `<span class="tag tag-time">⏱ ${q.duration}s</span>`}
-              ${hasAudio ? `<span class="tag tag-audio">🎵 Audio (${q.start}s)</span>` : ""}
+              ${hasAudio ? `<span class="tag tag-audio">🎵 Audio${q.driveAudio && !q.youtube ? " · Drive" : ""}</span>` : ""}
+              ${q.driveImage ? '<span class="tag tag-audio">🖼️ Image</span>' : ""}
             </div>
             <div class="q-item-text">${escapeHTML(q.text)}</div>
           </div>
@@ -1055,8 +1206,11 @@
         mode: document.getElementById("q-mode").value,
         duration,
         youtube: document.getElementById("q-youtube").value.trim(),
+        driveAudio: document.getElementById("q-drive-audio").value.trim(),
+        driveImage: document.getElementById("q-drive-image").value.trim(),
         start: Math.max(0, parseInt(document.getElementById("q-start").value, 10) || 0),
-        autoplay: document.getElementById("q-autoplay").value === "true"
+        autoplay: document.getElementById("q-autoplay").value === "true",
+        manualTimerStart: document.getElementById("q-manual-timer").checked
       };
 
       const editIdx = parseInt(document.getElementById("edit-index").value, 10);
@@ -1085,8 +1239,12 @@
       durationInput.value = isUnlimited ? 0 : q.duration;
 
       document.getElementById("q-youtube").value = q.youtube;
+      document.getElementById("q-drive-audio").value = q.driveAudio || "";
+      document.getElementById("q-drive-image").value = q.driveImage || "";
+      document.getElementById("media-options").open = Boolean(q.youtube || q.driveAudio || q.driveImage);
       document.getElementById("q-start").value = q.start;
       document.getElementById("q-autoplay").value = String(q.autoplay);
+      document.getElementById("q-manual-timer").checked = Boolean(q.manualTimerStart);
       document.getElementById("btn-cancel-edit").classList.remove("hidden");
     }
 
@@ -1099,8 +1257,12 @@
       document.getElementById("q-duration").disabled = false;
       document.getElementById("q-unlimited").checked = false;
       document.getElementById("q-youtube").value = "";
+      document.getElementById("q-drive-audio").value = "";
+      document.getElementById("q-drive-image").value = "";
+      document.getElementById("media-options").open = false;
       document.getElementById("q-start").value = 0;
       document.getElementById("q-autoplay").value = "true";
+      document.getElementById("q-manual-timer").checked = false;
       document.getElementById("btn-cancel-edit").classList.add("hidden");
     }
 
@@ -1177,12 +1339,26 @@
       stopYouTube();
       isPaused = false;
       timerWaitingForAudio = false;
+      timerStarted = false;
       document.getElementById("btn-pause-timer").textContent = "⏸ Pause Timer";
+      document.getElementById("btn-pause-timer").classList.remove("hidden");
+      document.getElementById("btn-start-timer").style.display = "none";
       document.getElementById("times-up-overlay").classList.add("hidden");
 
       const q = questions[idx];
       document.getElementById("stage-progress").textContent = `Question ${idx + 1} of ${questions.length}`;
       document.getElementById("stage-question").textContent = q.text;
+      const imageUrl = googleDriveMediaUrl(q.driveImage, "image");
+      const imageWrap = document.getElementById("stage-image-wrap");
+      const stageImage = document.getElementById("stage-image");
+      if (imageUrl) {
+        stageImage.src = imageUrl;
+        imageWrap.classList.remove("hidden");
+        stageImage.onerror = () => imageWrap.classList.add("hidden");
+      } else {
+        stageImage.removeAttribute("src");
+        imageWrap.classList.add("hidden");
+      }
 
       // Banner & Timer Visibility Setup
       const banner = document.getElementById("huge-banner");
@@ -1231,23 +1407,32 @@
         }
       }
 
-      // YouTube Audio setup & smart sync
+      // Audio setup: YouTube is controlled by the game; Drive uses Google's own player.
       const audioBox = document.getElementById("stage-audio-box");
       const vid = extractYouTubeID(q.youtube);
+      const driveAudioId = googleDriveFileId(q.driveAudio);
       let shouldWaitForAudio = false;
 
-      if (vid) {
+      if (vid || driveAudioId) {
         audioBox.classList.remove("hidden");
-        document.getElementById("audio-status").textContent = q.autoplay ? "Buffering audio..." : "Click Play Audio to start";
-        document.getElementById("btn-audio-toggle").textContent = "▶ Play Audio";
-        
-        if (q.autoplay && !isUnlimited) {
-          shouldWaitForAudio = true;
-          timerWaitingForAudio = true;
+        if (vid) {
+          hideDriveAudioEmbed();
+          document.getElementById("audio-status").textContent = q.autoplay ? "Loading audio..." : "Click Play Audio to start";
+          document.getElementById("btn-audio-toggle").textContent = "▶ Play Audio";
+          if (q.autoplay && !isUnlimited && !q.manualTimerStart) {
+            shouldWaitForAudio = true;
+            timerWaitingForAudio = true;
+          }
+          cueOrPlayYouTube(vid, q.start || 0, q.autoplay);
+        } else {
+          // Drive's iframe player cannot expose playback state or accept commands
+          // from this page, so the trivia timer runs independently.
+          document.getElementById("audio-status").textContent = "Google Drive player";
+          showDriveAudioEmbed(googleDrivePreviewUrl(q.driveAudio, q.autoplay));
         }
-        cueOrPlayYouTube(vid, q.start || 0, q.autoplay);
       } else {
         audioBox.classList.add("hidden");
+        hideDriveAudioEmbed();
       }
 
       // Setup Timer State
@@ -1256,14 +1441,40 @@
 
       if (!isUnlimited) {
         document.getElementById("timer-title-label").textContent = "Time Remaining";
-        if (shouldWaitForAudio) {
+        updateTimerUI();
+
+        if (q.manualTimerStart) {
+          // Hold the timer at its full duration until the host explicitly starts it.
+          timerStarted = false;
+          timerWaitingForAudio = false;
+          document.getElementById("timer-digits").textContent = "Ready";
+          document.getElementById("btn-start-timer").style.display = "inline-flex";
+          document.getElementById("btn-pause-timer").classList.add("hidden");
+        } else if (shouldWaitForAudio) {
           document.getElementById("timer-digits").textContent = "Buffering...";
           document.getElementById("progress-fill").style.width = "100%";
         } else {
-          updateTimerUI();
+          timerStarted = true;
           startCountdown();
         }
       }
+    }
+
+    function beginCurrentTimer() {
+      const q = questions[currentIndex];
+      if (!q || q.duration === 0 || timerStarted) return;
+
+      clearInterval(timerInterval);
+      timerWaitingForAudio = false;
+      isPaused = false;
+      timerStarted = true;
+      timeLeft = totalDuration;
+      updateTimerUI();
+
+      document.getElementById("btn-start-timer").style.display = "none";
+      document.getElementById("btn-pause-timer").classList.remove("hidden");
+      document.getElementById("btn-pause-timer").textContent = "⏸ Pause Timer";
+      startCountdown();
     }
 
     function startCountdown() {
@@ -1276,6 +1487,7 @@
 
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
+          timerStarted = false;
           handleTimesUp();
         }
       }, tickRate);
@@ -1301,7 +1513,7 @@
     }
 
     function toggleTimerPause() {
-      if (questions[currentIndex].duration === 0) return;
+      if (questions[currentIndex].duration === 0 || !timerStarted) return;
       isPaused = !isPaused;
       document.getElementById("btn-pause-timer").textContent = isPaused ? "▶ Resume Timer" : "⏸ Pause Timer";
     }
@@ -1315,7 +1527,17 @@
       document.getElementById("btn-pause-timer").textContent = "⏸ Pause Timer";
       timeLeft = totalDuration;
       updateTimerUI();
-      startCountdown();
+
+      if (q.manualTimerStart) {
+        timerStarted = false;
+        clearInterval(timerInterval);
+        document.getElementById("timer-digits").textContent = "Ready";
+        document.getElementById("btn-start-timer").style.display = "inline-flex";
+        document.getElementById("btn-pause-timer").classList.add("hidden");
+      } else {
+        timerStarted = true;
+        startCountdown();
+      }
     }
 
     function nextQuestion() {
